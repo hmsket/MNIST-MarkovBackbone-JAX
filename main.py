@@ -11,8 +11,8 @@ num1, num2 = 6, 7
 nh, no = 5, 2
 seed = 0
 mu = 0.1
-epochs = 5
-kernel_size = (25, 25)
+epochs = 1
+kernel_size = (15, 15)
 n_batch = 50
 
 F = F()
@@ -74,6 +74,9 @@ for i in range(epochs):
         batch_t = train_t[iter*n_batch:(iter+1)*n_batch]
         grads = grad_loss(params, batch_x, batch_t)
         params = update_params(params, grads)
+    
+    loss = loss_fn(params, train_x, train_t)
+    print(f'loss: {loss}')
 
 """ 検証 """
 y = predict(params, train_x)
