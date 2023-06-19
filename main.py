@@ -64,7 +64,7 @@ for i in range(epochs):
     print(f'epoch: {i+1} / {epochs}')
     
     key, key1 = random.split(key)
-    # 入力画像とラベルのインデックスを対応させたままシャッフルする
+    # train_xとtrain_tのインデックスを対応させたままシャッフルする
     p = random.permutation(key1, len(train_t))
     train_x = train_x[p]
     train_t = train_t[p]
