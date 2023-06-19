@@ -9,13 +9,13 @@ from linear import Linear
 from common import F
 
 
-num1, num2 = 6, 7
-nh, no = 5, 2
+num1, num2 = 3, 7
+nh, no = 5, 1
 seed = 0
-mu = 0.1
-epochs = 1
-kernel_size = (15, 15)
-n_batch = 50
+mu = 0.0005
+epochs = 10
+kernel_size = (23, 23)
+n_batch = 12183
 
 F = F()
 
@@ -39,14 +39,15 @@ def predict(params, x):
     tmp = conv.append_off_neuron(tmp)
     tmp = F.softmax(tmp, axis=2)
     tmp = conv.get_sum_prob_of_on_neuron(tmp)
-    tmp = linear.forward(linear_w, linear_b, tmp)
+    y = linear.forward(linear_w, linear_b, tmp)
     # tmp = linear.append_off_neuron(tmp)
-    y = F.softmax(tmp, axis=1)
+    # y = F.softmax(tmp, axis=1)
     return y
 
 def loss_fn(params, x, t):
     y = predict(params, x)
-    tmp_loss = -1 * jnp.sum(t*jnp.log(y+1e-7), axis=1) # cross entropy error
+    # tmp_loss = -1 * jnp.sum(t*jnp.log(y+1e-7), axis=1) # cross entropy error
+    tmp_loss = 1/2 * jnp.sum((t-y)*(t-y))
     loss = jnp.mean(tmp_loss)
     return loss
 
@@ -68,6 +69,7 @@ def create_axes(fig):
         axes.append(ax)
     return axes
 
+
 """ conv_wのアニメーションを作りながら学習 """
 fig = plt.figure()
 axes = create_axes(fig)
@@ -75,6 +77,20 @@ frames = [] # frameを格納するリスト
 
 grad_loss = jax.grad(loss_fn, argnums=0)
 max_iter = len(train_t) // n_batch
+
+# おもみの初期状態をアニメーションの１枚目に加える
+ims = []
+for i in range(len(axes)):
+    ax = axes[i]
+    ax.set_title(f'w_conv[{i}]')
+    ax.set_xticks([])
+    ax.set_yticks([])
+    cells = jnp.reshape(params[0][i], kernel_size)
+    im = ax.imshow(cells, cmap=plt.cm.gray_r)
+    ims.append(im)
+title = fig.text(0.5, 2.6, f'epoch: {0} / {epochs}, iter: {0} / {0}', size=plt.rcParams["axes.titlesize"], ha="center", transform=ax.transAxes)
+ims.append(title)
+frames.append(ims)
 
 for i in range(epochs):
     print(f'epoch: {i+1} / {epochs}')
