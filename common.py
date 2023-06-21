@@ -40,6 +40,12 @@ class F():
         test_images = test_images.astype('float32') / 255
         return (train_images, train_labels), (test_images, test_labels)
 
+    def sigmoid(self, x):
+        return 1 / (1+jnp.exp(-x))
+    
+    def tanh(self, x):
+        return (jnp.exp(x)-jnp.exp(-x)) / (jnp.exp(x)+jnp.exp(-x))
+
     def softmax(self, x, axis):
         max = jnp.max(x, axis=axis, keepdims=True)
         exp_x = jnp.exp(x-max)
