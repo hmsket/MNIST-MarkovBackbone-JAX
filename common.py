@@ -1,4 +1,6 @@
 from jax import numpy as jnp
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 from tensorflow.keras.datasets import mnist
 
 
@@ -52,6 +54,33 @@ class F():
         sum_exp_x = jnp.sum(exp_x, axis=axis, keepdims=True)
         new_x = exp_x / sum_exp_x
         return new_x
+    
+    def plot_area_of_max_weighted_sum(self, conv, params, image):
+        conv_w, conv_b = params
+        tmp_image = jnp.reshape(image, [1, image.shape[0], image.shape[1]]) # 自作関数を使うための，次元のつじつま合わせ
+        hidden = conv.forward(conv_w, conv_b, tmp_image)
+        tmp_idxs = jnp.argmax(hidden, axis=2)
+        idxs = jnp.reshape(tmp_idxs, tmp_idxs.shape[1]) # ２次元から１次元にする
+        
+        colors = ['r', 'g', 'b', 'c', 'm'] # 領域を示す線の色を適当に５色用意する
+
+        ax = plt.axes()
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+        for i in range(len(idxs)):
+            idx = idxs[i]
+            # 畳み込み後の行列の添字に対応する，畳み込み前の行列の添字を計算
+            q = idx // (image.shape[0] - conv_w.shape[0] + 1)
+            tmp_idx = idx + q * (conv_w.shape[0] - 1)
+            # ベクトルの添字に対応する，行列にreshapeしたときの座標を計算
+            x = tmp_idx // image.shape[0]
+            y = tmp_idx % image.shape[0]
+            r = patches.Rectangle(xy=(x-0.5,y-0.5), width=conv_w.shape[0], height=conv_w.shape[0], fill=False, color=colors[i%5])
+            ax.add_patch(r)
+
+        ax.imshow(image, cmap=plt.cm.gray_r)
+        plt.show()
     
     def test(self, y, t):
         total = t.shape[0]
