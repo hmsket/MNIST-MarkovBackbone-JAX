@@ -76,7 +76,7 @@ class F():
             # ベクトルの添字に対応する，行列にreshapeしたときの座標を計算
             x = tmp_idx // image.shape[0]
             y = tmp_idx % image.shape[0]
-            r = patches.Rectangle(xy=(x-0.5,y-0.5), width=conv.kernel_size[0], height=conv.kernel_size[1], fill=False, color=colors[i%5])
+            r = patches.Rectangle(xy=(y-0.5,x-0.5), width=conv.kernel_size[0], height=conv.kernel_size[1], fill=False, color=colors[i%5])
             ax.add_patch(r)
 
         ax.imshow(image, cmap=plt.cm.gray_r)
