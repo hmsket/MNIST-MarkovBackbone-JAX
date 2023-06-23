@@ -27,7 +27,7 @@ class F():
         test_labels = test_labels[jnp.where((test_labels == num1) | (test_labels == num2))]
 
         train_labels = jnp.where(train_labels==num1, 0, 1)
-        test_labels = jnp.where(test_labels==num2, 0, 1)
+        test_labels = jnp.where(test_labels==num1, 0, 1)
 
         # 出力層の素子が１個のとき
         # train_labels = jnp.reshape(train_labels, [train_labels.shape[0], -1])
