@@ -30,12 +30,12 @@ class F():
         test_labels = jnp.where(test_labels==num2, 0, 1)
 
         # 出力層の素子が１個のとき
-        train_labels = jnp.reshape(train_labels, [train_labels.shape[0], -1])
-        test_labels = jnp.reshape(test_labels, [test_labels.shape[0], -1])
+        # train_labels = jnp.reshape(train_labels, [train_labels.shape[0], -1])
+        # test_labels = jnp.reshape(test_labels, [test_labels.shape[0], -1])
 
         # 出力層の素子が２個以上のとき．（n個とする）
-        # train_labels = jnp.eye(n)[train_labels]
-        # test_labels = jnp.eye(n)[test_labels]
+        train_labels = jnp.eye(2)[train_labels]
+        test_labels = jnp.eye(2)[test_labels]
 
         # 0以上1以下に正規化
         train_images = train_images.astype('float32') / 255
@@ -71,12 +71,12 @@ class F():
         for i in range(len(idxs)):
             idx = idxs[i]
             # 畳み込み後の行列の添字に対応する，畳み込み前の行列の添字を計算
-            q = idx // (image.shape[0] - conv_w.shape[0] + 1)
-            tmp_idx = idx + q * (conv_w.shape[0] - 1)
+            q = idx // (image.shape[0] - conv.kernel_size[0] + 1)
+            tmp_idx = idx + q * (conv.kernel_size[0] - 1)
             # ベクトルの添字に対応する，行列にreshapeしたときの座標を計算
             x = tmp_idx // image.shape[0]
             y = tmp_idx % image.shape[0]
-            r = patches.Rectangle(xy=(x-0.5,y-0.5), width=conv_w.shape[0], height=conv_w.shape[0], fill=False, color=colors[i%5])
+            r = patches.Rectangle(xy=(x-0.5,y-0.5), width=conv.kernel_size[0], height=conv.kernel_size[1], fill=False, color=colors[i%5])
             ax.add_patch(r)
 
         ax.imshow(image, cmap=plt.cm.gray_r)
@@ -86,11 +86,11 @@ class F():
         total = t.shape[0]
 
         # 出力層の素子が１個のとき
-        y = jnp.where(y < 0, 0, 1)
+        # y = jnp.where(y < 0, 0, 1)
         
         # 出力層の素子が２個以上のとき
-        # y = jnp.argmax(y, axis=1)
-        # t = jnp.argmax(t, axis=1)
+        y = jnp.argmax(y, axis=1)
+        t = jnp.argmax(t, axis=1)
         
         ans = jnp.where(y == t, 1, 0)
         acc = jnp.sum(ans) / total
