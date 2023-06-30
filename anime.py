@@ -1,21 +1,23 @@
 import jax
 from jax import random, numpy as jnp
+
+import os
+from tqdm import tqdm
 import matplotlib.pyplot as plt
 import matplotlib.animation as anm
-from tqdm import tqdm
 
 from conv import Conv
 from linear import Linear
 from common import F
 
 
-num1, num2 = 3, 7
-nh, no = 5, 1
+num1, num2 = 6, 7
+nh, no = 2, 2
 seed = 0
-mu = 0.0005
-epochs = 10
-kernel_size = (23, 23)
-n_batch = 12183
+mu = 0.8
+epochs = 30
+kernel_size = (5, 5)
+n_batch = 10
 
 F = F()
 
@@ -39,15 +41,16 @@ def predict(params, x):
     tmp = conv.append_off_neuron(tmp)
     tmp = F.softmax(tmp, axis=2)
     tmp = conv.get_sum_prob_of_on_neuron(tmp)
-    y = linear.forward(linear_w, linear_b, tmp)
+    tmp = linear.forward(linear_w, linear_b, tmp)
     # tmp = linear.append_off_neuron(tmp)
-    # y = F.softmax(tmp, axis=1)
+    # y = F.sigmoid(tmp)
+    y = F.softmax(tmp, axis=1)
     return y
 
 def loss_fn(params, x, t):
     y = predict(params, x)
-    # tmp_loss = -1 * jnp.sum(t*jnp.log(y+1e-7), axis=1) # cross entropy error
-    tmp_loss = 1/2 * jnp.sum((t-y)*(t-y))
+    tmp_loss = -1 * jnp.sum(t*jnp.log(y+1e-7), axis=1) # cross entropy error
+    # tmp_loss = 1/2 * jnp.sum((t-y)*(t-y)) # squared error
     loss = jnp.mean(tmp_loss)
     return loss
 
@@ -82,21 +85,21 @@ max_iter = len(train_t) // n_batch
 ims = []
 for i in range(len(axes)):
     ax = axes[i]
-    ax.set_title(f'w_conv[{i}]')
+    ax.set_title(f'w_beta[{i}]')
     ax.set_xticks([])
     ax.set_yticks([])
     cells = jnp.reshape(params[0][i], kernel_size)
     im = ax.imshow(cells, cmap=plt.cm.gray_r)
     ims.append(im)
-title = fig.text(0.5, 2.6, f'epoch: {0} / {epochs}, iter: {0} / {0}', size=plt.rcParams["axes.titlesize"], ha="center", transform=ax.transAxes)
+title = fig.text(-0.1, 1.2, f'epoch: {0} / {epochs}', size=plt.rcParams["axes.titlesize"], ha="center", transform=ax.transAxes)
 ims.append(title)
 frames.append(ims)
 
 for i in range(epochs):
     print(f'epoch: {i+1} / {epochs}')
-    plt.title(f'epoch: {i+1} / {epochs}')
     
     key, key1 = random.split(key)
+
     # train_xとtrain_tのインデックスを対応させたままシャッフルする
     p = random.permutation(key1, len(train_t))
     train_x = train_x[p]
@@ -107,28 +110,39 @@ for i in range(epochs):
         batch_t = train_t[iter*n_batch:(iter+1)*n_batch]
         grads = grad_loss(params, batch_x, batch_t)
         params = update_params(params, grads)
-
-        # おもみアニメーションの作成
-        ims = []
-        for j in range(len(axes)):
-            ax = axes[j]
-            ax.set_title(f'w_conv[{j}]')
-            ax.set_xticks([])
-            ax.set_yticks([])
-            cells = jnp.reshape(params[0][j], kernel_size)
-            im = ax.imshow(cells, cmap=plt.cm.gray_r)
-            ims.append(im)
-        title = fig.text(0.5, 2.6, f'epoch: {i+1} / {epochs}, iter: {iter+1} / {max_iter}', size=plt.rcParams["axes.titlesize"], ha="center", transform=ax.transAxes)
-        ims.append(title)
-        frames.append(ims)
+    
+    # おもみアニメーションのフレームを作成
+    ims = []
+    for j in range(len(axes)):
+        ax = axes[j]
+        ax.set_title(f'w_beta[{j}]')
+        ax.set_xticks([])
+        ax.set_yticks([])
+        cells = jnp.reshape(params[0][j], kernel_size)
+        im = ax.imshow(cells, cmap=plt.cm.gray_r)
+        ims.append(im)
+    title = fig.text(-0.1, 1.2, f'epoch: {i+1} / {epochs}', size=plt.rcParams["axes.titlesize"], ha="center", transform=ax.transAxes)
+    ims.append(title)
+    frames.append(ims)
         
     # loss = loss_fn(params, train_x, train_t)
     # print(f'loss: {loss}')
 
 ani = anm.ArtistAnimation(fig, frames, interval=100)
-ani.save('./w_conv.gif', writer='pillow')
+ani.save('./w_conv_anime.gif', writer='pillow')
 
 """ 検証 """
 y = predict(params, train_x)
-acc = F.test(y, train_t)
-print(f'acc: {acc}')
+train_acc = F.test(y, train_t)
+print(f'acc: {train_acc}')
+
+y = predict(params, test_x)
+test_acc = F.test(y, test_t)
+print(f'acc: {test_acc}')
+
+""" 学習済みパラメータの保存 """
+os.mkdir(f'./params/{num1}_{num2}_tr{train_acc:.3f}_te{test_acc:.3f}_nh{nh}_no{no}_s{seed}_m{mu}_e{epochs}_k{kernel_size[0]}_b{n_batch}')
+jnp.save(f'./params/{num1}_{num2}_tr{train_acc:.3f}_te{test_acc:.3f}_nh{nh}_no{no}_s{seed}_m{mu}_e{epochs}_k{kernel_size[0]}_b{n_batch}/conv_w', params[0])
+jnp.save(f'./params/{num1}_{num2}_tr{train_acc:.3f}_te{test_acc:.3f}_nh{nh}_no{no}_s{seed}_m{mu}_e{epochs}_k{kernel_size[0]}_b{n_batch}/conv_b', params[1])
+jnp.save(f'./params/{num1}_{num2}_tr{train_acc:.3f}_te{test_acc:.3f}_nh{nh}_no{no}_s{seed}_m{mu}_e{epochs}_k{kernel_size[0]}_b{n_batch}/linear_w', params[2])
+jnp.save(f'./params/{num1}_{num2}_tr{train_acc:.3f}_te{test_acc:.3f}_nh{nh}_no{no}_s{seed}_m{mu}_e{epochs}_k{kernel_size[0]}_b{n_batch}/linear_b', params[3])
