@@ -16,7 +16,27 @@ class F():
         train_labels = jnp.eye(10)[train_labels]
         test_labels = jnp.eye(10)[test_labels]
         return (train_images, train_labels), (test_images, test_labels)
-    
+
+    def get_mnist_dataset_of_one_num(self, num):
+        (train_images, train_labels), (test_images, test_labels) = mnist.load_data()
+
+        train_images = train_images[jnp.where((train_labels == num))]
+        train_labels = train_labels[jnp.where((train_labels == num))]
+
+        test_images = test_images[jnp.where((test_labels == num))]
+        test_labels = test_labels[jnp.where((test_labels == num))]
+
+        train_labels = jnp.where(train_labels==num, 0, 1)
+        test_labels = jnp.where(test_labels==num, 0, 1)
+
+        train_labels = jnp.reshape(train_labels, [train_labels.shape[0], -1])
+        test_labels = jnp.reshape(test_labels, [test_labels.shape[0], -1])
+
+        # 0以上1以下に正規化
+        train_images = train_images.astype('float32') / 255
+        test_images = test_images.astype('float32') / 255
+        return (train_images, train_labels), (test_images, test_labels)
+
     def get_mnist_dataset_of_two_nums(self, num1, num2):
         (train_images, train_labels), (test_images, test_labels) = mnist.load_data()
 
