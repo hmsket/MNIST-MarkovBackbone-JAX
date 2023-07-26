@@ -8,3 +8,6 @@
 ## model2
 中間層の素子ごとに担当する入力画像の領域を変え，あらかじめ用意された８種類のフィルタで畳み込む．
 ![model2](https://github.com/hmsket/MNIST-MarkovBackbone-JAX/assets/74644437/afc2f6c5-6ff4-42bd-bcd8-6e6f3f1ddf56)
+
+## model3
+自動微分と手計算の値が一致するかを確認するために作成したネットワーク．検証できたので，お役御免．
