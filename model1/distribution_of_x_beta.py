@@ -41,7 +41,7 @@ x_beta_mean = jnp.mean(x_betas_sorted, axis=0)
 
 for i in range(nh):
     ax = fig.add_subplot(nh, 1, i+1)
-    ax.hist(x_beta_mean[i], bins=577, range=[0.0, x_beta_mean[i].max()])
+    ax.hist(x_beta_mean[i], bins=100, range=[0.0, x_beta_mean[i].max()])
     ax.set_title(rf'$l = {i+1}$')
 
 fig.suptitle(r'histogram of the average of $x^{\beta l}$')
