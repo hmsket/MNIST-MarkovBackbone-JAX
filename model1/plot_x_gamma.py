@@ -1,10 +1,10 @@
 from jax import numpy as jnp
 
+import matplotlib.pyplot as plt
+
 from conv import Conv
 from linear import Linear
 from common import F
-
-import matplotlib.pyplot as plt
 
 
 
@@ -44,15 +44,15 @@ fig = plt.figure()
 
 if no == 2:
     ax = fig.add_subplot()
-    ax.set_xlabel(r'$x_0^\gamma$')
-    ax.set_ylabel(r'$x_1^\gamma$')
+    ax.set_xlabel(r'$x_1^\gamma$')
+    ax.set_ylabel(r'$x_2^\gamma$')
+    ax.set_aspect('equal')
 if no == 3:
     ax = fig.add_subplot(projection='3d')
-    ax.set_xlabel(r'$x_0^\gamma$')
-    ax.set_ylabel(r'$x_1^\gamma$')
-    ax.set_zlabel(r'$x_2^\gamma$')
-
-ax.set_aspect('equal')
+    ax.set_xlabel(r'$x_1^\gamma$')
+    ax.set_ylabel(r'$x_2^\gamma$')
+    ax.set_zlabel(r'$x_3^\gamma$')
+    ax.view_init(elev=45, azim=60) # 3Dグラフの表示角度を変える
 
 for num in nums:
     (train_x, train_t), (test_x, test_t) = F.get_mnist_dataset([num])
