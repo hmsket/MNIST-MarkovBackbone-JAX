@@ -44,9 +44,9 @@ class F():
 
         return (train_images, train_labels), (test_images, test_labels)
 
-    def softmax(self, x, axis):
+    def softmax(self, x, t, axis):
         max = jnp.max(x, axis=axis, keepdims=True)
-        exp_x = jnp.exp(x-max)
+        exp_x = jnp.exp((x-max)/t)
         sum_exp_x = jnp.sum(exp_x, axis=axis, keepdims=True)
         new_x = jnp.divide(exp_x, sum_exp_x)
         return new_x

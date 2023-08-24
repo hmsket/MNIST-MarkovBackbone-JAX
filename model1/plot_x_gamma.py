@@ -29,14 +29,14 @@ params = [conv_w, conv_b, linear_w, linear_b]
 F = F()
 
 
-def calc_x_gamma(params, x):
+def calc_x_gamma(params, x, t=1.0):
     conv_w, conv_b, linear_w, linear_b = params
     tmp = conv.forward(conv_w, conv_b, x)
     tmp = conv.append_off_neuron(tmp)
-    tmp = F.softmax(tmp, axis=2)
+    tmp = F.softmax(tmp, t, axis=2)
     tmp = conv.get_sum_prob_of_on_neuron(tmp)
     tmp = linear.forward(linear_w, linear_b, tmp)
-    x_gamma = F.softmax(tmp, axis=1)
+    x_gamma = F.softmax(tmp, t, axis=1)
     return x_gamma
 
 
