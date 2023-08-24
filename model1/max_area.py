@@ -30,6 +30,9 @@ def get_max_idx_of_conved_matrix(params, x):
     conv_w, conv_b = params
     tmp = conv.forward(conv_w, conv_b, x)
     tmp = jnp.argmax(tmp, axis=2)
+    # ０番目は「興奮しない」を担当する
+    # 図の左上は，０番目ではなく，１番目に相当する
+    tmp = tmp - 1
     idxs = jnp.reshape(tmp, [-1]) # ２次元から１次元に変換する
     return idxs
 
@@ -63,6 +66,8 @@ for i in range(len(image_nums)):
 
     for j in range(len(idxs)):
         idx = idxs[j]
+        if idx == -1: # 「興奮しない」が勝ったとき
+            continue
         x, y = conved_matrix_idx_2_input_matrix_xy(idx)
         r = patches.Rectangle(xy=(y-0.5,x-0.5), width=conv.kernel_size[0], height=conv.kernel_size[1], fill=False, color=colors[j%5])
         ax.add_patch(r)
