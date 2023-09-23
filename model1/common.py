@@ -42,6 +42,11 @@ class F():
         train_labels = jnp.eye(len(num_list))[jnp.int8(train_labels)]
         test_labels = jnp.eye(len(num_list))[jnp.int8(test_labels)]
 
+        train_images = jnp.array(train_images)
+        train_labels = jnp.array(train_labels)
+        test_images = jnp.array(test_images)
+        test_labels = jnp.array(test_labels)
+
         return (train_images, train_labels), (test_images, test_labels)
 
     def softmax(self, x, t, axis):
