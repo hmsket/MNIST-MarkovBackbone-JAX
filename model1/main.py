@@ -16,6 +16,7 @@ mu = 0.8             # 学習係数
 kernel_size = [5, 5] # カーネルサイズ
 epochs = 30          # エポック数
 n_batch = 10         # バッチサイズ
+c = 0.001            # おもみをc倍で生成する
 
 
 """ インスタンスを生成 """
@@ -30,9 +31,9 @@ F = F()
 
 """ パラメータの初期生成 """
 key, key1 = random.split(random.PRNGKey(seed))
-conv_w, conv_b = conv.generate_params(key1)
+conv_w, conv_b = conv.generate_params(key1, c)
 key, key1 = random.split(key)
-linear_w, linear_b = linear.generate_params(key1)
+linear_w, linear_b = linear.generate_params(key1, c)
 params = [conv_w, conv_b, linear_w, linear_b]
 
 

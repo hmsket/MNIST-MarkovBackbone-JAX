@@ -18,6 +18,7 @@ mu = 0.8
 kernel_size = [5, 5]
 epochs = 30
 n_batch = 10
+c = 0.001
 
 
 """ インスタンスを生成 """
@@ -32,9 +33,9 @@ F = F()
 
 """ パラメータの初期生成 """
 key, key1 = random.split(random.PRNGKey(seed))
-conv_w, conv_b = conv.generate_params(key1)
+conv_w, conv_b = conv.generate_params(key1, c)
 key, key1 = random.split(key)
-linear_w, linear_b = linear.generate_params(key1)
+linear_w, linear_b = linear.generate_params(key1, c)
 params = [conv_w, conv_b, linear_w, linear_b]
 
 
@@ -108,7 +109,7 @@ dir = './params'
 if os.path.exists(dir) == False:
     os.mkdir(dir)
 
-dir = f'./params/{",".join(map(str, nums))}_tr{train_acc:.3f}_te{test_acc:.3f}_nh{nh}_no{no}_s{seed}_m{mu}_e{epochs}_k{kernel_size[0]}_b{n_batch}'
+dir = f'./params/{",".join(map(str, nums))}_tr{train_acc:.3f}_te{test_acc:.3f}_nh{nh}_no{no}_s{seed}_m{mu}_e{epochs}_k{kernel_size[0]}_b{n_batch}_c{c}'
 if os.path.exists(dir) == False:
     os.mkdir(dir)
 
