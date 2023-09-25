@@ -17,6 +17,7 @@ kernel_size = [5, 5] # カーネルサイズ
 epochs = 30          # エポック数
 n_batch = 10         # バッチサイズ
 c = 0.001            # おもみをc倍で生成する
+t = [1.0, 1.0]       # softmaxの温度パラメータ
 
 
 """ インスタンスを生成 """
@@ -39,14 +40,14 @@ params = [conv_w, conv_b, linear_w, linear_b]
 
 """ 関数の定義 """
 @jax.jit
-def predict(params, x, t=1.0):
+def predict(params, x):
     conv_w, conv_b, linear_w, linear_b = params
     tmp = conv.forward(conv_w, conv_b, x)
     tmp = conv.append_off_neuron(tmp)
-    tmp = F.softmax(tmp, t, axis=2)
+    tmp = F.softmax(tmp, t[0], axis=2)
     tmp = conv.get_sum_prob_of_on_neuron(tmp)
     tmp = linear.forward(linear_w, linear_b, tmp)
-    y = F.softmax(tmp, t, axis=1)
+    y = F.softmax(tmp, t[1], axis=1)
     return y
 
 @jax.jit

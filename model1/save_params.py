@@ -19,6 +19,7 @@ kernel_size = [5, 5]
 epochs = 30
 n_batch = 10
 c = 0.001
+t = [1.0, 1.0]
 
 
 """ インスタンスを生成 """
@@ -40,14 +41,14 @@ params = [conv_w, conv_b, linear_w, linear_b]
 
 
 """ 関数の定義 """
-def predict(params, x, t=1.0):
+def predict(params, x):
     conv_w, conv_b, linear_w, linear_b = params
     tmp = conv.forward(conv_w, conv_b, x)
     tmp = conv.append_off_neuron(tmp)
-    tmp = F.softmax(tmp, t, axis=2)
+    tmp = F.softmax(tmp, t[0], axis=2)
     tmp = conv.get_sum_prob_of_on_neuron(tmp)
     tmp = linear.forward(linear_w, linear_b, tmp)
-    y = F.softmax(tmp, t, axis=1)
+    y = F.softmax(tmp, t[1], axis=1)
     return y
 
 @jax.jit
@@ -109,7 +110,7 @@ dir = './params'
 if os.path.exists(dir) == False:
     os.mkdir(dir)
 
-dir = f'./params/{",".join(map(str, nums))}_tr{train_acc:.3f}_te{test_acc:.3f}_nh{nh}_no{no}_s{seed}_m{mu}_e{epochs}_k{kernel_size[0]}_b{n_batch}_c{c}'
+dir = f'./params/{",".join(map(str, nums))}_tr{train_acc:.3f}_te{test_acc:.3f}_nh{nh}_no{no}_s{seed}_m{mu}_e{epochs}_k{kernel_size[0]}_b{n_batch}_c{c}_t{t[0]},{t[1]}'
 if os.path.exists(dir) == False:
     os.mkdir(dir)
 
