@@ -47,13 +47,12 @@ def calc_x_beta(params, x):
     tmp = conv.forward(conv_w, conv_b, x)
     tmp = conv.append_off_neuron(tmp)
     tmp = F.softmax(tmp, t=1.0, axis=2)
-    tmp = tmp[:,:,1:]
     x_beta = jnp.reshape(tmp, [tmp.shape[1], tmp.shape[2]])
     return x_beta
 
 @jax.jit
 def get_max_idx_of_x_beta(x_beta):
-    idxs = jnp.argmax(x_beta, axis=1)
+    idxs = jnp.argmax(x_beta[:,1:], axis=1)
     return idxs
 
 @jax.jit
@@ -67,23 +66,26 @@ def conved_matrix_idx_2_input_matrix_xy(idx):
     y = tmp_idx % mnist_size
     return x, y
 
-@jax.jit
+# @jax.jit
 def G(x_beta, o):
-    x1 = jnp.reshape(x_beta[0], [-1, 1])
-    x2 = jnp.reshape(x_beta[1], [1, -1])
-
-    tmp_x = jnp.matmul(x1, x2)
-    tmp_x = jnp.reshape(tmp_x, [1, -1])
-    tmp_o = jnp.reshape(o, [-1, 1])
-
-    tmp = jnp.matmul(tmp_x, tmp_o)
-    sum = tmp[0][0]
+    sum = 0
+    for i in range(nh):
+        for j in range(i+1, nh):
+            x1 = jnp.reshape(x_beta[i,1:], [-1, 1])
+            x2 = jnp.reshape(x_beta[j,1:], [1, -1])
+            tmp_x = jnp.matmul(x1, x2)
+            tmp_x = jnp.reshape(tmp_x, [1, -1])
+            tmp_o = jnp.reshape(o, [-1, 1])
+            tmp = jnp.matmul(tmp_x, tmp_o)
+            sum += tmp[0][0]
     return sum
 
 @jax.jit
 def update_x_beta(x_beta, grads, mu=0.1):
     x_beta = x_beta.at[0].set(x_beta[0]+mu*grads[0])
     x_beta = x_beta.at[1].set(x_beta[1]+mu*grads[1])
+    divisor = jnp.reshape(jnp.sum(x_beta, axis=1), [-1, 1])
+    x_beta = x_beta / divisor # normalize
     return x_beta
 
 
