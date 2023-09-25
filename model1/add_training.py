@@ -9,7 +9,7 @@ import os
 
 
 # 事前に学習したパラメータファイルを読み込む
-dir = '6,7_tr0.991_te0.988_nh5_no2_s0_m0.8_e30_k5_b10'
+dir = '6,7_tr0.989_te0.983_nh2_no2_s0_m0.1_e1000_k5_b10_c0.001'
 
 
 """ ハイパーパラメータの読み込み """
@@ -21,7 +21,8 @@ seed = int(hyparams[5][1:])
 mu = float(hyparams[6][1:])
 pre_epochs = int(hyparams[7][1:])
 kernel_size = [int(hyparams[8][1:]), int(hyparams[8][1:])]
-n_batch = epochs = int(hyparams[9][1:])
+n_batch = int(hyparams[9][1:])
+c = float(hyparams[10][1:])
 
 
 """ ハイパーパラメータの指定 """
@@ -117,7 +118,7 @@ dir = './params'
 if os.path.exists(dir) == False:
     os.mkdir(dir)
 
-dir = f'./params/{",".join(map(str, nums))}_tr{train_acc:.3f}_te{test_acc:.3f}_nh{nh}_no{no}_s{seed}_m{mu}_e{pre_epochs+epochs}_k{kernel_size[0]}_b{n_batch}'
+dir = f'./params/{",".join(map(str, nums))}_tr{train_acc:.3f}_te{test_acc:.3f}_nh{nh}_no{no}_s{seed}_m{mu}_e{pre_epochs+epochs}_k{kernel_size[0]}_b{n_batch}_c{c}'
 if os.path.exists(dir) == False:
     os.mkdir(dir)
 
