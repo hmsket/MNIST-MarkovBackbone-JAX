@@ -8,9 +8,9 @@ class Linear():
         self.ni = ni
         self.no = no
 
-    def generate_params(self, key):
-        w = random.normal(key, shape=[self.ni, self.no])
-        b = random.normal(key, shape=[self.no])
+    def generate_params(self, key, c):
+        w = c * random.normal(key, shape=[self.ni, self.no])
+        b = c * random.normal(key, shape=[self.no])
         return w, b
 
     @partial(jit, static_argnums=(0,))
