@@ -8,12 +8,13 @@ import matplotlib.pyplot as plt
 
 
 # 事前に学習したパラメータファイルを読み込む
-dir = '6,7_tr0.968_te0.972_nh2_no2_s0_m0.8_e30_k5_b10'
+dir = '6,7_tr0.903_te0.890_nh2_no2_s0_m0.8_e30_k5_b10_c0.001_t0.3,1.0'
 
 hyparams = dir.split('_') # hyper parameters
 nums = list(map(int, hyparams[0].split(',')))
 nh = int(hyparams[3][2:])
 kernel_size = (int(hyparams[8][1:]), int(hyparams[8][1:]))
+t = list(map(float, hyparams[0].split(',')))
 
 conv = Conv(nh, kernel_size)
 
@@ -29,7 +30,7 @@ def calc_x_beta(params, x):
     conv_w, conv_b = params
     tmp = conv.forward(conv_w, conv_b, x)
     tmp = conv.append_off_neuron(tmp)
-    x_beta = F.softmax(tmp, t=1.0, axis=2)
+    x_beta = F.softmax(tmp, t[0], axis=2)
     return x_beta
 
 
