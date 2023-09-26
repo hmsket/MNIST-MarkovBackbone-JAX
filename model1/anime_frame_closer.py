@@ -19,7 +19,7 @@ hyparams = dir.split('_') # hyper parameters
 nums = list(map(int, hyparams[0].split(',')))
 nh = int(hyparams[3][2:])
 kernel_size = (int(hyparams[8][1:]), int(hyparams[8][1:]))
-t = list(map(float, hyparams[0].split(',')))
+t = list(map(float, hyparams[11][1:].split(',')))
 
 # インスタンス生成
 conv = Conv(nh, kernel_size)
@@ -105,7 +105,7 @@ ax = plt.axes()
 ax.set_xticks([])
 ax.set_yticks([])
 frames = []
-color_list = ['r', 'g']
+color_list = ['r', 'g', 'b', 'c', 'm']
 
 N = 20 # num of iteration
 cells = jnp.reshape(image, [image.shape[1], image.shape[2]]) # (28, 28)

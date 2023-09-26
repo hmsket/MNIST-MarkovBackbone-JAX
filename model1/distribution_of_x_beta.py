@@ -14,7 +14,7 @@ hyparams = dir.split('_') # hyper parameters
 nums = list(map(int, hyparams[0].split(',')))
 nh = int(hyparams[3][2:])
 kernel_size = (int(hyparams[8][1:]), int(hyparams[8][1:]))
-t = list(map(float, hyparams[0].split(',')))
+t = list(map(float, hyparams[11][1:].split(',')))
 
 conv = Conv(nh, kernel_size)
 

@@ -23,7 +23,7 @@ pre_epochs = int(hyparams[7][1:])
 kernel_size = [int(hyparams[8][1:]), int(hyparams[8][1:])]
 n_batch = int(hyparams[9][1:])
 c = float(hyparams[10][1:])
-t = list(map(float, hyparams[0].split(',')))
+t = list(map(float, hyparams[11][1:].split(',')))
 
 
 """ ハイパーパラメータの指定 """
