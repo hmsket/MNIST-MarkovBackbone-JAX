@@ -8,7 +8,7 @@ class Linear():
         self.ni = ni
         self.no = no
 
-    def generate_params(self, key, c):
+    def generate_params(self, key, c=0.001):
         w = c * random.normal(key, shape=[self.ni, self.no])
         b = c * random.normal(key, shape=[self.no])
         return w, b

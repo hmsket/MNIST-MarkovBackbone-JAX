@@ -8,7 +8,7 @@ class Conv():
         self.no = no
         self.kernel_size = kernel_size
         
-    def generate_params(self, key, c):
+    def generate_params(self, key, c=0.001):
         w = c * random.normal(key, shape=[self.no, self.kernel_size[0]*self.kernel_size[1]])
         b = c * random.normal(key, shape=[self.no, 1])
         return w, b
