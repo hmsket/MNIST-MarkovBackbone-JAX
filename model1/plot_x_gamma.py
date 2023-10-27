@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 from conv import Conv
 from linear import Linear
-from common import F
+from common import *
 
 
 
@@ -12,11 +12,10 @@ from common import F
 dir = '6,7_tr0.903_te0.890_nh2_no2_s0_m0.8_e30_k5_b10_c0.001_t0.3,1.0'
 
 hyparams = dir.split('_') # hyper parameters
-nums = list(map(int, hyparams[0].split(',')))
+labels = list(map(int, hyparams[0].split(',')))
 nh = int(hyparams[3][2:])
 no = int(hyparams[4][2:])
 kernel_size = (int(hyparams[8][1:]), int(hyparams[8][1:]))
-t = list(map(float, hyparams[0].split(',')))
 
 conv = Conv(nh, kernel_size)
 linear = Linear(nh, no)
@@ -27,17 +26,15 @@ linear_w = jnp.load(f'./params/{dir}/linear_w.npy')
 linear_b = jnp.load(f'./params/{dir}/linear_b.npy')
 params = [conv_w, conv_b, linear_w, linear_b]
 
-F = F()
-
 
 def calc_x_gamma(params, x):
     conv_w, conv_b, linear_w, linear_b = params
     tmp = conv.forward(conv_w, conv_b, x)
     tmp = conv.append_off_neuron(tmp)
-    tmp = F.softmax(tmp, t[0], axis=2)
+    tmp = softmax(tmp, axis=2)
     tmp = conv.get_sum_prob_of_on_neuron(tmp)
     tmp = linear.forward(linear_w, linear_b, tmp)
-    x_gamma = F.softmax(tmp, t[1], axis=1)
+    x_gamma = softmax(tmp, axis=1)
     return x_gamma
 
 
@@ -55,13 +52,13 @@ if no == 3:
     ax.set_zlabel(r'$x_3^\gamma$')
     ax.view_init(elev=45, azim=60) # 3Dグラフの表示角度を変える
 
-for num in nums:
-    (train_x, train_t), (test_x, test_t) = F.get_mnist_dataset([num])
+for label in labels:
+    (train_x, train_y), (test_x, test_y) = get_mnist_dataset([label])
     x_gammas = calc_x_gamma(params, train_x)
     if no == 2:
-        ax.plot(x_gammas[:,0], x_gammas[:,1], marker='.', ls='None', label=num)
+        ax.plot(x_gammas[:,0], x_gammas[:,1], marker='.', ls='None', label=label)
     if no == 3:
-        ax.plot(x_gammas[:,0], x_gammas[:,1], x_gammas[:,2], marker='.', ls='None', label=num)
+        ax.plot(x_gammas[:,0], x_gammas[:,1], x_gammas[:,2], marker='.', ls='None', label=label)
 
 plt.legend()
 plt.show()

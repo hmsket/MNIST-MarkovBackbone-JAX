@@ -1,18 +1,17 @@
 from jax import numpy as jnp
 
-from conv import Conv
-from common import F
-
-from tqdm import tqdm
 import matplotlib.pyplot as plt
+
+from conv import Conv
+from common import *
 
 
 
 # 事前に学習したパラメータファイルを読み込む
-dir = '6,7_tr0.968_te0.972_nh2_no2_s0_m0.8_e30_k5_b10'
+dir = '6,7_tr0.991_te0.984_nh2_no2_s0_m0.1_e1000_k5_b10'
 
 hyparams = dir.split('_') # hyper parameters
-nums = list(map(int, hyparams[0].split(',')))
+labels = list(map(int, hyparams[0].split(',')))
 nh = int(hyparams[3][2:])
 kernel_size = (int(hyparams[8][1:]), int(hyparams[8][1:]))
 
@@ -21,8 +20,6 @@ conv = Conv(nh, kernel_size)
 conv_w = jnp.load(f'./params/{dir}/conv_w.npy')
 conv_b = jnp.load(f'./params/{dir}/conv_b.npy')
 params = [conv_w, conv_b]
-
-F = F()
 
 
 def get_area_of_max_weighted_sum(params, image):
@@ -41,7 +38,7 @@ def get_area_of_max_weighted_sum(params, image):
     areas = jnp.empty(areas_shape)
     
     for i in range(nh):
-        for j in tqdm(range(image.shape[0])):
+        for j in range(image.shape[0]):
             tmp = image[j, x[j,i]:x[j,i]+kernel_size[0], y[j,i]:y[j,i]+kernel_size[1]]
             tmp = jnp.reshape(tmp, kernel_size[0]*kernel_size[1])
             areas = areas.at[i,:,j].set(tmp)
@@ -51,8 +48,8 @@ def get_area_of_max_weighted_sum(params, image):
 
 fig = plt.figure()
 
-for i in range(len(nums)):
-    (train_x, train_t), (test_x, test_t) = F.get_mnist_dataset([nums[i]])
+for i in range(len(labels)):
+    (train_x, train_y), (test_x, test_y) = get_mnist_dataset([labels[i]])
 
     x = get_area_of_max_weighted_sum(params, train_x)
 
@@ -62,7 +59,7 @@ for i in range(len(nums)):
         corr = jnp.matmul(params[0][j], x[j])
         corrs = corrs.at[j].set(corr)
 
-    projection_xs = jnp.empty([nh, train_x.shape[0], kernel_size[0]*conv.kernel_size[1]])
+    projection_xs = jnp.empty([nh, train_x.shape[0], kernel_size[0]*kernel_size[1]])
 
     for j in range(nh):
         for k in range(train_x.shape[0]):
@@ -74,14 +71,14 @@ for i in range(len(nums)):
     for j in range(nh):
         x = nh % 3
         y = nh // 3
-        ax = fig.add_subplot(len(nums), nh, i*nh+j+1)
+        ax = fig.add_subplot(len(labels), nh, i*nh+j+1)
         ax.set_xticks([])
         ax.set_yticks([])
         
         cells_tmp = ave_pro_x[j]
         cells = jnp.reshape(cells_tmp, (kernel_size[0], conv.kernel_size[1]))
 
-        ax.set_title(f'w_beta[{j}]: input "{nums[i]}"')
+        ax.set_title(f'w_beta[{j}]: input "{labels[i]}"')
         ax.imshow(cells, cmap=plt.cm.gray_r)
 
 plt.show()

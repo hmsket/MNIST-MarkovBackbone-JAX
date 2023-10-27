@@ -2,7 +2,7 @@ from jax import numpy as jnp
 
 from conv import Conv
 from linear import Linear
-from common import F
+from common import *
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -10,14 +10,13 @@ import matplotlib.patches as patches
 
 
 # 事前に学習したパラメータファイルを読み込む
-dir = '6,7_tr0.903_te0.890_nh2_no2_s0_m0.8_e30_k5_b10_c0.001_t0.3,1.0'
+dir = '6,7_tr0.964_te0.967_nh2_no2_s0_m0.1_e641_k5_b10_c0.001_t1.0,1.0_overlap2'
 
 hyparams = dir.split('_') # hyper parameters
-nums = list(map(int, hyparams[0].split(',')))
+labels = list(map(int, hyparams[0].split(',')))
 nh = int(hyparams[3][2:])
 no = int(hyparams[4][2:])
 kernel_size = (int(hyparams[8][1:]), int(hyparams[8][1:]))
-t = list(map(float, hyparams[11][1:].split(',')))
 
 conv = Conv(nh, kernel_size)
 linear = Linear(nh, no)
@@ -28,27 +27,26 @@ linear_w = jnp.load(f'./params/{dir}/linear_w.npy')
 linear_b = jnp.load(f'./params/{dir}/linear_b.npy')
 params = [conv_w, conv_b, linear_w, linear_b]
 
-F = F()
-(train_x, train_t), (test_x, test_t) = F.get_mnist_dataset(nums)
+(train_x, train_y), (test_x, test_y) = get_mnist_dataset(labels)
 
 
 def predict(params, x):
     conv_w, conv_b, linear_w, linear_b = params
     tmp = conv.forward(conv_w, conv_b, x)
     tmp = conv.append_off_neuron(tmp)
-    tmp = F.softmax(tmp, t[0], axis=2)
+    tmp = softmax(tmp, axis=2)
     tmp = conv.get_sum_prob_of_on_neuron(tmp)
     tmp = linear.forward(linear_w, linear_b, tmp)
-    tmp = F.softmax(tmp, t[1], axis=1)
+    tmp = softmax(tmp, axis=1)
     idx = jnp.argmax(tmp)
-    y = nums[idx]
-    return y
+    z = labels[idx]
+    return z
 
 def get_max_idx_of_conved_matrix(conv_params, x):
     conv_w, conv_b = conv_params
     tmp = conv.forward(conv_w, conv_b, x)
     tmp = conv.append_off_neuron(tmp)
-    tmp = F.softmax(tmp, t[0], axis=2)
+    tmp = softmax(tmp, axis=2)
     tmp = jnp.argmax(tmp, axis=2)
     # ０番目は「興奮しない」を担当する
     # 図の左上は，０番目ではなく，１番目に相当する
@@ -93,9 +91,9 @@ for i in range(len(image_nums)):
         r = patches.Rectangle(xy=(y-0.5,x-0.5), width=conv.kernel_size[0], height=conv.kernel_size[1], fill=False, color=colors[j%5])
         ax.add_patch(r)
 
-    y = predict(params, image)
-    label = nums[jnp.argmax(train_t[num: num+1])]
-    ax.set_title(f'{y} / {label}')
+    z = predict(params, image)
+    label = labels[jnp.argmax(train_y[num: num+1])]
+    ax.set_title(f'{z} / {label}')
     ax.imshow(jnp.reshape(image, [28, 28]), cmap=plt.cm.gray_r)
 
 plt.show()
